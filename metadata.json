@@ -1,0 +1,5 @@
+{
+  "name": "ControlePro - Gestão Contábil",
+  "description": "Um aplicativo web simples, responsivo e intuitivo para gestão de clientes e obrigações fiscais mensais de empresas atendidas por um escritório de contabilidade. O sistema permite o controle de pendências fiscais, folha de pagamento, emissão de certidões negativas e consultas de CPF/CNPJ.",
+  "requestFramePermissions": []
+}
