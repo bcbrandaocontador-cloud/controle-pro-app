@@ -250,17 +250,19 @@ const ClientViewModal: React.FC<{
 
     useEffect(() => { if (isOpen) setActiveTab('details'); }, [isOpen]);
 
-// FIX: The useMemo hook was refactored to explicitly type the initial value for the `reduce` function. 
-// This resolves a type inference issue that caused subsequent errors when mapping over the resulting object.
+    // FIX: Switched to using a generic argument for the `reduce` method to ensure correct type inference for the accumulator.
+    // This resolves an issue where the grouped documents were of type 'unknown', causing a crash when calling '.map'.
     const documentsByCompetence = useMemo(() => {
-        return documents.reduce((acc, doc) => {
+        return documents.reduce<Record<string, ClientDocument[]>>((acc, doc) => {
             const [year, month] = doc.competence.split('-');
             const date = new Date(parseInt(year), parseInt(month) - 1, 1);
             const competenceLabel = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).replace(/^\w/, c => c.toUpperCase());
-            if (!acc[competenceLabel]) acc[competenceLabel] = [];
+            if (!acc[competenceLabel]) {
+                acc[competenceLabel] = [];
+            }
             acc[competenceLabel].push(doc);
             return acc;
-        }, {} as Record<string, ClientDocument[]>);
+        }, {});
     }, [documents]);
     
     if (!client) return null;

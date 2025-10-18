@@ -1,3 +1,4 @@
+
 import React from 'react';
 import type { View } from '../App';
 
@@ -19,8 +20,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
 
   return (
     <aside className="w-64 bg-primary text-white flex flex-col">
-      <div className="h-16 flex items-center justify-center text-2xl font-bold border-b border-secondary">
-        Contábil<span className="text-accent">System</span>
+      <div className="h-16 flex items-center justify-center px-4 border-b-2 border-secondary">
+          <div className="flex items-center">
+              <span className="text-3xl font-black text-white" style={{fontFamily: 'sans-serif'}}>B</span>
+              <span className="text-3xl font-black text-secondary -ml-2.5" style={{fontFamily: 'sans-serif'}}>C</span>
+              <div className="ml-3 flex flex-col justify-center">
+                  <span className="text-sm font-bold text-white leading-tight tracking-wide">BRANDÃO</span>
+                  <span className="text-xs text-gray-300 leading-tight">CONTABILIDADE</span>
+              </div>
+          </div>
       </div>
       <nav className="flex-1 px-4 py-6 space-y-2">
         {navItems.map(item => (
@@ -29,8 +37,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
             onClick={() => setView(item.id as View)}
             className={`w-full flex items-center px-4 py-2 text-left rounded-lg transition-colors ${
               currentView === item.id
-                ? 'bg-accent text-white'
-                : 'text-gray-300 hover:bg-secondary hover:text-white'
+                ? 'bg-secondary text-white'
+                : 'text-gray-300 hover:bg-gray-800 hover:text-white'
             }`}
           >
             <span className="mr-3">{item.icon}</span>
@@ -39,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
         ))}
       </nav>
       <div className="p-4 border-t border-secondary">
-        <p className="text-sm text-center text-gray-400">© 2024 ContábilSystem</p>
+        <p className="text-sm text-center text-gray-400">© 2024 Brandão Contabilidade</p>
       </div>
     </aside>
   );

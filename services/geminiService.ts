@@ -1,8 +1,20 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import type { CpfData, CnpjData, Obligation, Task, Client, ClientDocument } from '../types';
 import { TaxRegime } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+let aiInstance: GoogleGenAI | null = null;
+
+const getAiInstance = (): GoogleGenAI => {
+    if (!aiInstance) {
+        if (!process.env.API_KEY) {
+            throw new Error("A chave da API (API_KEY) não foi configurada nas variáveis de ambiente.");
+        }
+        aiInstance = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    }
+    return aiInstance;
+};
+
 
 // --- PROMPTS ---
 
@@ -50,7 +62,7 @@ const generatePromptForWhatsApp = (
       A obrigação é: "${details.name}".
       A data de vencimento é: ${details.dueDate}.
 
-      A mensagem deve começar com "Olá, ${clientName}!" e terminar com "Atenciosamente, ControlePro Contabilidade".
+      A mensagem deve começar com "Olá, ${clientName}!" e terminar com "Atenciosamente, Brandão Contabilidade".
       Gere a mensagem final.
     `;
   } else { // Task
@@ -59,7 +71,7 @@ const generatePromptForWhatsApp = (
       O objetivo é lembrar o cliente sobre uma tarefa/solicitação que está pendente.
       A descrição da tarefa é: "${details.description}".
 
-      A mensagem deve começar com "Olá, ${clientName}!" e pedir educadamente para o cliente verificar a pendência. Termine com "Atenciosamente, ControlePro Contabilidade".
+      A mensagem deve começar com "Olá, ${clientName}!" e pedir educadamente para o cliente verificar a pendência. Termine com "Atenciosamente, Brandão Contabilidade".
       Gere a mensagem final.
     `;
   }
@@ -127,9 +139,8 @@ const responseSchemaDocumentAnalysis = {
 // --- API FUNCTIONS ---
 
 const callGemini = async (prompt: string, schema: object, model: string = "gemini-2.5-flash") => {
-    if (!process.env.API_KEY) throw new Error("API_KEY environment variable not set.");
-
     try {
+        const ai = getAiInstance();
         const response = await ai.models.generateContent({
             model,
             contents: prompt,
@@ -142,6 +153,9 @@ const callGemini = async (prompt: string, schema: object, model: string = "gemin
         return JSON.parse(response.text.trim());
     } catch (error) {
         console.error("Error calling Gemini API:", error);
+        if (error instanceof Error && error.message.includes("API_KEY")) {
+            throw new Error("A chave da API não foi configurada corretamente.");
+        }
         throw new Error("Falha na comunicação com a API de IA.");
     }
 };
@@ -152,6 +166,7 @@ export const queryDocument = async (type: 'CPF' | 'CNPJ', value: string): Promis
   try {
       return await callGemini(prompt, schema);
   } catch(e) {
+      if (e instanceof Error) throw e;
       throw new Error("Falha ao consultar os dados. Verifique o documento e tente novamente.");
   }
 };
@@ -173,10 +188,6 @@ export const generateWhatsAppMessage = async (
   item: Obligation | Task,
   client: Client
 ): Promise<string> => {
-  if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set.");
-  }
-
   const isObligation = 'dueDate' in item;
 
   const details = isObligation
@@ -186,18 +197,19 @@ export const generateWhatsAppMessage = async (
   const prompt = generatePromptForWhatsApp(client.name, details);
 
   try {
+     const ai = getAiInstance();
      const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: prompt,
     });
     // Replace placeholder with actual office name
-    return response.text.replace("[Nome do Escritório]", "ControlePro Contabilidade");
+    return response.text.replace("[Nome do Escritório]", "Brandão Contabilidade");
   } catch (error) {
     console.error("Error generating WhatsApp message with Gemini:", error);
     // Fallback message
     if (isObligation) {
-        return `Olá, ${client.name}! Lembrete de vencimento da obrigação *${item.name}* em *${details.dueDate}*. Atenciosamente, ControlePro Contabilidade.`;
+        return `Olá, ${client.name}! Lembrete de vencimento da obrigação *${item.name}* em *${details.dueDate}*. Atenciosamente, Brandão Contabilidade.`;
     }
-    return `Olá, ${client.name}! Lembrete de pendência: *${item.description}*. Atenciosamente, ControlePro Contabilidade.`;
+    return `Olá, ${client.name}! Lembrete de pendência: *${item.description}*. Atenciosamente, Brandão Contabilidade.`;
   }
 };

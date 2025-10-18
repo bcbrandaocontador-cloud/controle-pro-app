@@ -1,5 +1,6 @@
+
 {
-  "name": "ControlePro - Gestão Contábil",
-  "description": "Um aplicativo web simples, responsivo e intuitivo para gestão de clientes e obrigações fiscais mensais de empresas atendidas por um escritório de contabilidade. O sistema permite o controle de pendências fiscais, folha de pagamento, emissão de certidões negativas e consultas de CPF/CNPJ.",
+  "name": "Brandão Contabilidade - Gestão Contábil",
+  "description": "Um aplicativo web para o escritório Brandão Contabilidade, focado na gestão de clientes e obrigações fiscais mensais. O sistema permite o controle de pendências, folha de pagamento, emissão de certidões e consultas.",
   "requestFramePermissions": []
 }
